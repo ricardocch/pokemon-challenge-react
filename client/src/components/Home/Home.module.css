@@ -1,0 +1,13 @@
+.Home{
+    background-color: #ebedec;
+    min-height: 90vh;
+}
+
+
+/* Track */
+.Home select::-webkit-scrollbar-track {
+  background: yelow;
+}
+
+
+
