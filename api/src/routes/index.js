@@ -86,7 +86,10 @@ router.get("/favorites/:username", async function(req,res){
         let collection = await dbConnectCollection("Favoritos")
 
         let users = await collection.findOne({name:req.params.username})
-        res.status(200).send(users.favorites)
+        if(users)
+         res.status(200).send(users.favorites)
+        else
+            res.status(200).send([])
     }
     catch(err){
         console.log(err);
