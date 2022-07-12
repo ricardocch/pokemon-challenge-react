@@ -6,66 +6,11 @@ const initialState = {
   toShow:[],
   totalPages:0,
   PokemonDetail:{},
-  createInfo:null
+  createInfo:null,
+  Users:[],
+  selectedUser:""
 };
 
-
-function sortAscType(arr,types){
-  let newArr = []
-  let sort = true;
-
-  types.forEach( type => {
-
-    arr.forEach( el =>{
-      if(sort){
-        el.types = el.types.sort(function (a, b) {
-          if (a > b) {
-            return 1;
-          }
-          if (a < b) {
-            return -1;
-          }
-          
-          return 0;
-        });
-      }
-     
-      if(el.types[0] === type.name) newArr.push(el)
-    })   
-    sort = false
-  } )
- 
-  return newArr;
-}
-
-
-function sortDescType(arr,types){
-  let newArr = []
-  let sort = true;
-
-  for(let i = types.length -1; i >= 0;i-- ) {
-
-    arr.forEach( el =>{
-      if(sort){
-        el.types = el.types.sort(function (a, b) {
-          if (a < b) {
-            return 1;
-          }
-          if (a > b) {
-            return -1;
-          }
-          
-          return 0;
-        });
-      }
-     
-      if(el.types[0] === types[i].name) newArr.push(el)
-    })   
-    sort = false
-  } 
- 
-  return newArr;
-}
 
 function sortAsc(arr,property){
   property = property !== '' ? property.toLowerCase() : 'id'
@@ -153,12 +98,8 @@ const pokemons = (state = initialState, action) => {
       };
       case "orderBy":
       let tmpOrder = null
-      
-      if(action.payload.value !== 'Type')
-        tmpOrder = action.payload.order === 'ASC' ? sortAsc(state.tmpPokemons,action.payload.value) : sortDesc(state.tmpPokemons,action.payload.value)
-      else
-        tmpOrder = action.payload.order === 'ASC' ? sortAscType(state.tmpPokemons,state.types) : sortDescType(state.tmpPokemons,state.types)
-      
+
+      tmpOrder = action.payload.order === 'ASC' ? sortAsc(state.tmpPokemons,action.payload.value) : sortDesc(state.tmpPokemons,action.payload.value)
 
       let tmp2 = getShowPages(tmpOrder)
       return {...state,
@@ -170,7 +111,7 @@ const pokemons = (state = initialState, action) => {
 
       case "filterCreated":
 
-      let tmpFilters = action.payload.Type !== '' ? state.Pokemons.filter( el => el.types.includes(action.payload.Type)) : state.Pokemons
+      let tmpFilters =  [...state.Pokemons]
       if(action.payload.created === "N") 
           tmpFilters = tmpFilters.filter( el => el.created === false)
       else if(action.payload.created === "C") 
@@ -220,32 +161,54 @@ const pokemons = (state = initialState, action) => {
           createInfo:null
         };
 
-      // case "reset":
-      // return {
-      //   ...state,
-      //   Pokemons:[],
-      //   tmpPokemons:[],
-      //   page:1,
-      //   toShow:[],
-      //   createInfo:null,
-      //   totalPages:0,
-      //   PokemonDetail:{}
-      // };
+      case "addUser":
+        let users = [...state.Users]
+        users.push(action.payload.name)
+        return {
+          ...state,
+          Users:users,
+          createInfo:action.payload.name ? action.payload.msg : action.payload.err
+        }
+        
+        case "getUsers":
+          return {
+            ...state,
+            Users:action.payload.users
+          }
 
-      // case "search":
+        case "setUser":
 
-      // let tmpSearch = action.payload !== '' ? state.Pokemons.filter( el => el.name.toLowerCase() === action.payload.toLowerCase()) : state.Pokemons
+          let  formatJson =  state.Pokemons.map( el =>{
+            return {
+              ...el,
+              favorite: action.payload.arrayFavorites.length && action.payload.arrayFavorites.findIndex( fav => el.name === fav.name ) >= 0 ? true : false
+            }
+          } )
+          let pagesFav = getShowPages(formatJson)
+          return {...state,
+            tmpPokemons:formatJson,
+            selectedUser:action.payload.user,
+            toShow:pagesFav[0],
+            totalPages:pagesFav[1],
+            Pokemons:formatJson,
+            Page:1
+          };
 
-
-      // let tmp4 = getShowPages(tmpSearch)
-
-      // return {...state,
-      //   tmpPokemons:tmpSearch,
-      //   toShow:tmp4[0],
-      //   totalPages:tmp4[1],
-      //   page:1
-      // };
-      
+        
+        case "getFavorites":
+          let pages = getShowPages(action.payload)
+          let pokemons = action.payload?.map( el => el.favorite = true)
+          return {...state,
+            tmpPokemons:pokemons,
+            Pokemons:pokemons,
+            toShow:pages[0],
+            totalPages:pages[1],
+            Page:1
+          };
+        case "addFavorite":
+          return {
+            ...state
+          }
     default:
       return state
   }

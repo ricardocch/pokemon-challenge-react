@@ -6,6 +6,9 @@
     color: yellow;
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+    justify-content: space-evenly;
 }
 
 .ActioonsContainer select{

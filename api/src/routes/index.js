@@ -3,15 +3,7 @@ const axios = require('axios');
 const {dbConnectCollection} = require('../db.js');
 const router = Router();
 
-// Configurar los routers
-// Ejemplo: router.use('/auth', authRouter);
 
-router.get("/test", async function(req,res){
-    let collection = await dbConnectCollection("CustomPokemon")
-    let results = await collection.find({"id":98764}).toArray()
-   console.log(results);
-    return res.status(200).send(results);
-})
 
 router.get("/types", function(req,res){
     res.set('Content-Type', 'application/json');
@@ -29,6 +21,77 @@ router.get("/types", function(req,res){
         console.log(err)
        return res.status(500).send({err})
     });
+
+} )
+
+router.post("/users", async function(req,res){
+    try{
+        let collection = await dbConnectCollection("Favoritos")
+        let user = {
+            name:req.body.name,
+            favorites:[]
+        }
+
+        collection.insertOne(user)
+        res.status(200).send({name:user.name,msg:"Usuario insertado con exito"})
+    }
+    catch(e){
+        res.status(500).send({err:'Error al insertar usuario'})
+    }
+
+} )
+
+router.get("/users", async function(req,res){
+    try{
+        let collection = await dbConnectCollection("Favoritos")
+
+        let users = await collection.find().toArray()
+        users = users?.map( user => user.name)
+        res.status(200).send({users})
+    }
+    catch(err){
+        console.log(err);
+        res.status(500).send({err:'Error al obtener usuario'})
+    }
+
+} )
+
+
+router.post("/favorites", async function(req,res){
+    try{
+        let collection = await dbConnectCollection("Favoritos")
+        console.log("user",req.body);
+        let users = await collection.findOne({name:req.body.username})
+        favoritesPokemon = {
+            name: req.body.name,
+            id: req.body.id,
+            img: req.body.img
+        }
+        if(users && users.favorites.findIndex( el => el.name === favoritesPokemon.name) < 0){
+            console.log("entre");
+            users.favorites.push(favoritesPokemon)
+            collection.updateOne({name:req.body.username},{$set:{favorites:users.favorites}})
+        }
+        res.status(200).send({msg:"Favorito agregado"})
+    }
+    catch(err){
+        console.log(err);
+        res.status(500).send({err:'Error al agregar favorito'})
+    }
+
+} )
+
+router.get("/favorites/:username", async function(req,res){
+    try{
+        let collection = await dbConnectCollection("Favoritos")
+
+        let users = await collection.findOne({name:req.params.username})
+        res.status(200).send(users.favorites)
+    }
+    catch(err){
+        console.log(err);
+        res.status(500).send({err:'Error al agregar favorito'})
+    }
 
 } )
 
@@ -128,7 +191,7 @@ router.get("/pokemons/:id", async function(req,res){
         res.status(200).send([responseJSON])
     }
     else{
-        responseJSON = await collection.find({id:Number(req.params.id)}).toArray();
+        responseJSON = await collection.find({id:req.params.id}).toArray();
         res.status(200).send(responseJSON)
     }
 
@@ -140,14 +203,12 @@ router.get("/pokemons/:id", async function(req,res){
 router.post('/pokemons',async function(req,res){
  
     try{
-        let {name,weight,height,hp,type,attack,defense,speed,id} = req.body
+        let {name,weight,height,hp,type,attack,defense,speed} = req.body
         let pokemon = { 
-            id,
-            name,
+            name:name.toLowerCase(),
             weight,
             height,
             hp,
-            type,
             attack,
             defense,
             speed,
@@ -155,8 +216,16 @@ router.post('/pokemons',async function(req,res){
             created:true
         }
 
-        let collection = await dbConnectCollection("CustomPokemon")
+        let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let charactersLength = characters.length;
+        let id = "";
+        for ( var i = 0; i < 20; i++ ) {
+          id += characters.charAt(Math.floor(Math.random() * charactersLength));
+       }
 
+        let collection = await dbConnectCollection("CustomPokemon")
+        pokemon.img = "/Agumon.png"
+        pokemon.id = id
         collection.insertOne(pokemon)
      
         res.status(200).send({...pokemon,img:'',succes:'Pokemon Creado con Exito'})

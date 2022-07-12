@@ -20,9 +20,8 @@ function FormPokemon({types,createInfo,getTypes,createPokemon,resetStatusCreate}
         if(createInfo !== null && createInfo.hasOwnProperty("succes")){
             resetStatusCreate()
             if (window.confirm('Pokemon Created,Do you want create another pokemon?')) {
-                console.log(refForm);
+
                 for(let i = 0; i < refForm.current.length;i++){
-                    // console.log(refForm.current[i]);
                     if(refForm.current[i].localName === "input" || refForm.current[i].localName === "select" )  refForm.current[i].value = ''  
                      
                 }
@@ -35,7 +34,7 @@ function FormPokemon({types,createInfo,getTypes,createPokemon,resetStatusCreate}
 
     function addType(e){
         e.preventDefault()
-        let index = pokemonTypes.findIndex( el => el.id === refType.current.value)
+        let index = pokemonTypes.findIndex( el => el.name === refType.current.value)
         
         if( index < 0 && refType.current.value){
             setPokemonTypes([...pokemonTypes,
@@ -103,7 +102,7 @@ function FormPokemon({types,createInfo,getTypes,createPokemon,resetStatusCreate}
         if(pokemonTypes.length === 0) 
             tmpErrors = {...tmpErrors,typeEmty:true}
         else
-            data = {...data,type:pokemonTypes.map(el =>  Number(el.id))}
+            data = {...data,type:pokemonTypes.map(el =>  el.name)}
 
         setErros(tmpErrors)
      
@@ -169,7 +168,7 @@ function FormPokemon({types,createInfo,getTypes,createPokemon,resetStatusCreate}
             <select ref={refType} tabIndex="8">
             <option value="" name="type">Type</option>
                 { types.length === 0 ? <option>Cargando...</option> 
-                    : types.map(el => <option key={el.id} value={el.id}>{el.name}</option>)
+                    : types.map(el => <option key={el.id} value={el.name}>{el.name}</option>)
                 }
             </select>
             <button onClick={(e) => addType(e)}>Add type</button>

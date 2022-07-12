@@ -9,7 +9,7 @@ function Orders({orderBy}) {
     function changeOrder(e){
          
         e.target.innerText.substring(0,1) === 'D' ? setOrder('DESC') : setOrder('ASC')
-        console.log();
+
         orderBy({value:select.current.value,
             order:e.target.innerText.substring(0,1) === 'D' ? 'DESC' : 'ASC'
         })

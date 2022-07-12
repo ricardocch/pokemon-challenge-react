@@ -1,14 +1,14 @@
 import style from './Filters.module.css';
 import { connect } from 'react-redux';
-import { filterCreated, getTypes } from '../../../../actions';
+import { filterCreated } from '../../../../actions';
 import { useEffect, useRef } from 'react';
 
-function Filters({types,getTypes,filterCreated}) {
+function Filters({filterCreated}) {
 
     let selectType = useRef('')
     let selectCreate = useRef('')
     useEffect(()=>{
-        if(types.length === 0)  getTypes()
+
     },[])
     
     function onChange(){
@@ -19,14 +19,6 @@ function Filters({types,getTypes,filterCreated}) {
   return (
     <div className={style.Filters} onChange={(e)=> onChange()}>
         <label>Filter by:</label>
-        <select  ref={selectType}>
-            <option value="">Type</option>
-            { types.length === 0 ? <option>Cargando...</option> 
-                : types.map(el => <option key={el.id} value={el.name}>{el.name}</option>)
-            }
-        </select>
-
-        {/* <label>Exist:</label> */}
         <select ref={selectCreate} onChange={(e)=> onChange()}>
             <option value="">Is Created?</option>
             <option value="N">Not Crated</option>
@@ -42,4 +34,4 @@ function mapStateToProps(state){
     }
 }
 
-export default connect(mapStateToProps,{getTypes,filterCreated})(Filters)
+export default connect(mapStateToProps,{filterCreated})(Filters)

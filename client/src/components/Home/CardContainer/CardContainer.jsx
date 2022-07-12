@@ -9,7 +9,7 @@ function CardContainer({data}) {
                               id={el.id}
                               img={el.img !== '' ? el.img : '/Agumon.png'}
                               name={el.name}
-                              types={el.types}/>)} 
+                              favorite={el.favorite}/>)} 
     </div>
   );
 }
